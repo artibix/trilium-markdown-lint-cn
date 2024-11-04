@@ -38,18 +38,8 @@ class MarkdownLinter {
         this.rules = [
             this.fixSpaceAroundAlphabet,          // 中英文空格
             this.fixSpaceAroundNumber,            // 中数字空格
-            this.fixNoEmptyCodeLang,              // 代码块语言
-            this.fixNoEmptyUrl,                   // 链接地址
-            this.fixNoEmptyList,                  // 列表内容
-            this.fixNoEmptyCode,                  // 代码块内容
-            this.fixNoEmptyInlineCode,            // 行内代码
-            this.fixNoEmptyBlockquote,            // 引用块
             this.fixUseStandardEllipsis,          // 省略号
             this.fixNoFullwidthNumber,            // 全角数字
-            this.fixNoSpaceInLink,                // 链接空格
-            this.fixNoMultipleSpaceBlockquote,    // 引用块空格
-            this.fixCorrectTitleTrailingPunctuation, // 标题标点
-            this.fixNoSpaceInInlineCode,          // 行内代码空格
         ];
     }
 
@@ -112,79 +102,6 @@ class MarkdownLinter {
         } : null;
     }
 
-    // 代码块语言不能为空
-    fixNoEmptyCodeLang(line) {
-        const regex = /^(```)\s*()(\s*$)/;
-        const fixedLine = line.replace(regex, '```text');
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '为空代码块添加默认语言 text'
-        } : null;
-    }
-
-    // 链接地址不能为空
-    fixNoEmptyUrl(line) {
-        const regex = /\[([^\]]+)\]\(\s*\)/g;
-        const fixedLine = line.replace(regex, (match, text) => {
-            return `[${text}](#)`;
-        });
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '为空链接添加默认锚点'
-        } : null;
-    }
-
-    // 列表内容不能为空
-    fixNoEmptyList(line) {
-        const regex = /^(\s*[-*+])\s*$/;
-        const fixedLine = line.replace(regex, '');
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '删除空列表项'
-        } : null;
-    }
-
-    // 代码块内容不能为空
-    fixNoEmptyCode(line) {
-        const startCodeBlockRegex = /^```\w*\s*$/;
-        const endCodeBlockRegex = /^```\s*$/;
-
-        if (startCodeBlockRegex.test(line)) {
-            // 检查下一行是否为空或结束代码块
-            return {
-                fixedLine: '',
-                description: '删除空代码块'
-            };
-        }
-
-        return null;
-    }
-
-    // 行内代码块不能为空
-    fixNoEmptyInlineCode(line) {
-        const regex = /`\s*`/g;
-        const fixedLine = line.replace(regex, '');
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '删除空行内代码块'
-        } : null;
-    }
-
-    // 引用块不能为空
-    fixNoEmptyBlockquote(line) {
-        const regex = /^>\s*$/;
-        const fixedLine = line.replace(regex, '');
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '删除空引用块'
-        } : null;
-    }
-
     // 使用标准省略号
     fixUseStandardEllipsis(line) {
         const chineseEllipsisRegex = /\.\.\.|…{1,}/g;
@@ -208,50 +125,6 @@ class MarkdownLinter {
         return line !== fixedLine ? {
             fixedLine,
             description: '转换全角数字为半角'
-        } : null;
-    }
-
-    // 删除链接前后空格
-    fixNoSpaceInLink(line) {
-        const regex = /\[\s+([^\]]+)\s+\]\(([^)]+)\)/g;
-        const fixedLine = line.replace(regex, '[$1]($2)');
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '删除链接文本前后空格'
-        } : null;
-    }
-
-    // 引用块只保留一个空格
-    fixNoMultipleSpaceBlockquote(line) {
-        const regex = /^(>)\s{2,}/;
-        const fixedLine = line.replace(regex, '> ');
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '引用块空格规范化'
-        } : null;
-    }
-
-    // 标题末尾标点修复
-    fixCorrectTitleTrailingPunctuation(line) {
-        const regex = /^(#{1,6}\s+.+?)([.。,，;；:：])\s*$/;
-        const fixedLine = line.replace(regex, '$1');
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '删除标题末尾不合法标点'
-        } : null;
-    }
-
-    // 行内代码块前后空格
-    fixNoSpaceInInlineCode(line) {
-        const regex = /`\s+(.+?)\s+`/g;
-        const fixedLine = line.replace(regex, '`$1`');
-
-        return line !== fixedLine ? {
-            fixedLine,
-            description: '删除行内代码块前后空格'
         } : null;
     }
 }
